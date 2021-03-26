@@ -1,0 +1,50 @@
+version: "3"
+
+services:
+  zookeeper:
+    image: zookeeper:3.6
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    env_file:
+      - conf/zookeeper.env
+
+  kafka:
+    image: confluentinc/cp-kafka:6.1.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    env_file:
+      - conf/kafka.env
+    volumes:
+      - ./conf/secrets/:/etc/kafka/secrets/
+
+  kafkacat:
+    image: confluentinc/cp-kafkacat
+    container_name: kafkacat
+    command: sleep infinity
+    depends_on:
+      - kafka
+
+  # schema-registry:
+  #   image: confluentinc/cp-schema-registry:6.0.1
+  #   container_name: schema-registry
+  #   depends_on:
+  #     - kafka
+  #   ports:
+  #     - "8081:8081"
+  #   env_file:
+  #     - conf/schema-registry.env
+
+  mosquitto:
+    image: eclipse-mosquitto:2.0.7
+    container_name: mosquitto
+    volumes:
+      - ./conf:/mosquitto/config/
+    ports:
+      - "1883:1883"
+      - "8883:8883"
+      - "9001:9001"
